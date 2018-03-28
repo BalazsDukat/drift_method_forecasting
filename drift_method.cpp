@@ -14,25 +14,27 @@ int main(int argc, char* argv[])
 vector<double> TS;
 double d;
 if(argc < 2)
-{cout <<
-"Please enter the name of the time-series file \n" <<
+{cout << "Please enter the name of the time-series file \n" <<
 "(ideally should be a csv or tsv file) \nthat you want to continue:\n";
 cin >> file_name;
 }
-else
-{file_name = argv[1];
-//cout << argv[1] << '\t' << argv[0];
-}
+else file_name = argv[1];
 
 fstream file;
 file.open(file_name.c_str());
+if(!file.is_open())
+{cerr << "Failed to open file " << file_name << "\n" <<
+"Please check if the file is in the same folder as the executable,\n" <<
+"then check whether the file name was typed correctly, and restart.\n";
+exit(EXIT_FAILURE);
+}
 char c;
 
   while((file >> noskipws >> c))
   {if((isspace(c)) || (c == ',') || (c == '|')) //looking for some sort of a delimiter
     {if(temp != "" && (get_type(temp) == 'd' || get_type(temp) == 'i'))
       {d = atof(temp.c_str());
-      TS.push_back(d);  //cout << temp << " " << d << ", ";
+      TS.push_back(d);
       } //else ;//leave it, temp is empty or wrong type
     temp = ""; //there was a delimiter, so no matter what it has, flush temp.
     }
@@ -41,7 +43,7 @@ char c;
     }
   }
 file.close(); //finished with the file, close it for now.
-int period = 1; /*this has o be signed as well as position has to be signed,
+int period = 1; /*this has to be signed as well as position has to be signed,
 so position can go below 0, which is a condition*/
 unsigned int steps = 1;
 
@@ -67,7 +69,7 @@ while((position - period) >= 0)
 
 double drift = (collector / counter);
 
-file.open(file_name.c_str(),std::ostream::app); //re-open the file for writing.
+file.open(file_name.c_str(),std::ostream::app); //re-open the file for appending.
 file << "\n";
 for(unsigned int i = 0; i < steps; i++)
 {result = TS[TS.size() - period] + drift;
